@@ -29,11 +29,11 @@ public class PPOTrainer {
 
     public static void main(String[] args) {
         PPOTrainer trainer = new PPOTrainer();
-        boolean training = false;
+        boolean training = true;
         if (!training) {
             trainer.run();
         } else {
-            trainer.loadNetworks();
+//            trainer.loadNetworks();
             trainer.start();
         }
     }
@@ -42,16 +42,16 @@ public class PPOTrainer {
 
         // Initialize networks.
         // 57 inputs, 58 outputs. size 128 hidden.
-        actor.addLayer(new DenseLayer(57, 20));
-        actor.addLayer(new DenseLayer(20, 20));
-        actor.addLayer(new DenseLayer(20, 58).setActivationFunctionSigmoid());
+        actor.addLayer(new DenseLayer(57, 32));
+        actor.addLayer(new DenseLayer(32, 32));
+        actor.addLayer(new DenseLayer(32, 58).setActivationFunctionSigmoid());
 
-        critic.addLayer(new DenseLayer(57, 20));
-        critic.addLayer(new DenseLayer(20, 20));
-        critic.addLayer(new DenseLayer(20, 1).setActivationFunctionLinear());
+        critic.addLayer(new DenseLayer(57, 32));
+        critic.addLayer(new DenseLayer(32, 32));
+        critic.addLayer(new DenseLayer(32, 1).setActivationFunctionLinear());
 
-        actor.setLearningRate(0.0003);
-        critic.setLearningRate(0.0003);
+        actor.setLearningRate(0.01);
+        critic.setLearningRate(0.01);
     }
 
     public void loadNetworks() {
@@ -71,7 +71,7 @@ public class PPOTrainer {
         while (true) {
             WarGame game = new WarGame();
             game.setup();
-            int steps = 400;
+            int steps = 250;
 
             PPOPlayer player = new PPOPlayer(actor, critic);
             PPOPlayer player2 = new PPOPlayer(actor, critic);
@@ -152,9 +152,6 @@ public class PPOTrainer {
         int episodes = 20000;
         double gamma;
 
-        actor.setLearningRate(0.0003);
-        critic.setLearningRate(0.0003);
-
         // Open a window with a single button called stop, that sets run to false.
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -166,8 +163,7 @@ public class PPOTrainer {
 
         for (int i = 0; i < episodes && run; i++) {
 
-            gamma = Math.min(episodes * (0.99 / 100), 0.99);
-            gamma = 0.00018;
+            gamma = 0;
 
             // Create game instance.
             WarGame game = new WarGame();
@@ -181,7 +177,7 @@ public class PPOTrainer {
             double totalReward1 = 0;
             double totalReward2 = 0;
 
-            int maxSteps = 1024;
+            int maxSteps = 150;
             for (int j = 0; j < maxSteps && game.getWinner() == -1; j++) {
 
                 WarGameState state1 = game.getCurrentGameState();
@@ -218,7 +214,7 @@ public class PPOTrainer {
             }
 
             player1.collectMemory(player2);
-            player1.fit(50, gamma);
+            player1.fit(100, gamma);
 
             System.out.println("Episode " + i + ": " + totalReward1 + " " + totalReward2 + " WIN: " + game.getWinner());
         }
@@ -231,6 +227,8 @@ public class PPOTrainer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        run();
     }
 
     public double handleActions(WarGame game, EntityPlayer player, Vector2D flagPos, double[] actions, double[] actionsTaken, int[] actionMask, boolean chooseMax) {
@@ -324,7 +322,7 @@ public class PPOTrainer {
         Vector2D newPos = player.getPosition();
 
         double distanceDelta = (oldPos.distance(flagPos) - newPos.distance(flagPos));
-        reward += 0.25 * distanceDelta;
+        reward += 0.35 * distanceDelta;
 
         return reward;
     }

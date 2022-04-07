@@ -132,7 +132,7 @@ public class PPOPlayer {
     public void fit(int batchSize, double gamma) {
         if (gameStateList.size() == 0) throw new IllegalStateException("No game states to fit to");
 
-        double clipParam = 0.1;
+        double clipParam = 0.12;
 
         double[] advantages = advantages(gamma, 0.95);
         GameState[] states = gameStateList.toArray(new GameState[0]);
