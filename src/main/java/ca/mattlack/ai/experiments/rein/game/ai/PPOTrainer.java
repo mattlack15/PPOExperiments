@@ -177,7 +177,7 @@ public class PPOTrainer {
             double totalReward1 = 0;
             double totalReward2 = 0;
 
-            int maxSteps = 150;
+            int maxSteps = 250;
             for (int j = 0; j < maxSteps && game.getWinner() == -1; j++) {
 
                 WarGameState state1 = game.getCurrentGameState();
@@ -214,7 +214,7 @@ public class PPOTrainer {
             }
 
             player1.collectMemory(player2);
-            player1.fit(100, gamma);
+            player1.fit(40, gamma);
 
             System.out.println("Episode " + i + ": " + totalReward1 + " " + totalReward2 + " WIN: " + game.getWinner());
         }
@@ -322,7 +322,7 @@ public class PPOTrainer {
         Vector2D newPos = player.getPosition();
 
         double distanceDelta = (oldPos.distance(flagPos) - newPos.distance(flagPos));
-        reward += 0.35 * distanceDelta;
+        reward += distanceDelta;
 
         return reward;
     }
